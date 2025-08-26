@@ -62,12 +62,12 @@ export default function Index() {
   };
 
   return (
-    <SafeAreaView className="flex-1 px-3 bg-[#FFFEFF]">
+    <SafeAreaView className="flex-1 px-3 bg-background">
       {/* StatusBar component to set the status bar style */}
       <StatusBar barStyle="dark-content" backgroundColor="#FFFEFF" />
 
       <View className="items-center mt-2">
-        <Text className="text-3xl font-bold text-[#131826] text-center my-2">
+        <Text className="text-3xl font-bold text-textDark text-center my-2">
           Remove Background
         </Text>
       </View>
@@ -75,7 +75,7 @@ export default function Index() {
       {/* Shere and More Apps buttons */}
       <View className="flex-row justify-center gap-3 px-4 py-4 ">
         <TouchableOpacity
-          className="bg-white px-4 py-1 rounded-md flex-row justify-center items-center gap-3"
+          className="bg-textprimary px-4 py-1 rounded-md flex-row justify-center items-center gap-3"
           activeOpacity={0.4}
           onPress={onShare}
         >
@@ -84,7 +84,7 @@ export default function Index() {
         </TouchableOpacity>
         <TouchableOpacity
           activeOpacity={0.4}
-          className="bg-white px-4 py-1 rounded-md flex-row justify-center items-center gap-3"
+          className="bg-textprimary px-4 py-1 rounded-md flex-row justify-center items-center gap-3"
         >
           <MaterialIcons name="window" size={20} color="black" />
           <Text>More Apps</Text>
@@ -93,7 +93,7 @@ export default function Index() {
 
       {/* image upload section */}
       <View
-        className="bg-[#FFFEFF] rounded-lg m-3 items-center p-5"
+        className="bg-background rounded-lg m-3 items-center p-5"
         style={{
           shadowColor: "#000",
           shadowOffset: { width: 0, height: 2 },
@@ -106,16 +106,16 @@ export default function Index() {
           <AntDesign name="cloudupload" size={50} color="#5480ED" />
         </View>
         <Text className="font-bold text-2xl my-2">Upload Image</Text>
-        <Text className="text-xl text-[#131826] mb-4">
+        <Text className="text-xl text-textDark mb-4">
           Choose an image to remove background
         </Text>
         <TouchableOpacity
           onPress={pickImage}
           activeOpacity={0.8}
-          className="bg-[#5480ED] px-4 py-4  rounded-md w-full flex-row gap-4 justify-center items-center "
+          className="bg-primary px-4 py-4  rounded-md w-full flex-row gap-4 justify-center items-center "
         >
           <FontAwesome6 name="add" size={20} color="white" />
-          <Text className="text-white text-xl ">Upload Image</Text>
+          <Text className="text-textprimary text-xl ">Upload Image</Text>
         </TouchableOpacity>
       </View>
 
