@@ -28,7 +28,6 @@ export default function Index() {
 
       if (result.action === Share.sharedAction) {
         if (result.activityType) {
-          // iOS: shared with a specific app
           console.log("Shared with:", result.activityType);
         } else {
           console.log("Shared successfully");
@@ -64,7 +63,7 @@ export default function Index() {
   return (
     <SafeAreaView className="flex-1 px-3 bg-[#FFFEFF]">
       {/* StatusBar component to set the status bar style */}
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFEFF" />
+      <StatusBar barStyle="default" backgroundColor="#3b063b" />
 
       <View className="items-center mt-2">
         <Text className="text-3xl font-bold text-[#131826] text-center my-2">
