@@ -1,9 +1,9 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
-import Entypo from "@expo/vector-icons/Entypo";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React from "react";
-import { StatusBar, Text, TouchableOpacity, View } from "react-native";
+import { StatusBar, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Morebutton from "../components/Buttons/Morebutton";
+import Sharebutton from "../components/Buttons/Sharebutton";
 
 const processing = () => {
   return (
@@ -18,21 +18,8 @@ const processing = () => {
 
       {/* Share and More Apps */}
       <View className="flex-row justify-center gap-3 px-4 py-4">
-        <TouchableOpacity
-          className="bg-textprimary px-4 py-1 rounded-md flex-row justify-center items-center gap-3"
-          activeOpacity={0.4}
-          // onPress={onShare}
-        >
-          <Entypo name="share" size={20} color="black" />
-          <Text>Share App</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          activeOpacity={0.4}
-          className="bg-textprimary px-4 py-1 rounded-md flex-row justify-center items-center gap-3"
-        >
-          <MaterialIcons name="window" size={20} color="black" />
-          <Text>More Apps</Text>
-        </TouchableOpacity>
+       <Sharebutton />
+        <Morebutton />
       </View>
 
       {/* Upload or Display Image */}

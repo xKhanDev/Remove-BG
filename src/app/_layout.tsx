@@ -27,7 +27,7 @@ export default function RootLayout() {
       <Stack.Screen
         name="output"
         options={{
-          headerShown: true,
+          headerShown: false,
           title: "Output",
           headerTitleAlign: "center",
           headerStyle: { backgroundColor: "transparent" },

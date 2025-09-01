@@ -1,49 +1,17 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
-import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useState } from "react";
-import {
-  Alert,
-  Image,
-  Share,
-  StatusBar,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, Image, StatusBar, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import CustomButton from "../components/Buttons/CustomButton";
+import Morebutton from "../components/Buttons/Morebutton";
+import Sharebutton from "../components/Buttons/Sharebutton";
 
 export default function Index() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-
-  // Function to handle sharing the app
-  const onShare = async () => {
-    try {
-      const message =
-        "Hey! Check this out 🚀" +
-        "\n\n" + // new line for readability
-        "Title: Share With Friends" +
-        "\n" +
-        "Link: https://example.com";
-
-      const result = await Share.share({ message });
-
-      if (result.action === Share.sharedAction) {
-        if (result.activityType) {
-          console.log("Shared with:", result.activityType);
-        } else {
-          console.log("Shared successfully");
-        }
-      } else if (result.action === Share.dismissedAction) {
-        console.log("Share dismissed");
-      }
-    } catch (error) {
-      console.error("Error sharing:", error);
-    }
-  };
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -65,7 +33,6 @@ export default function Index() {
 
   const removeBackground = () => {
     router.push("/processing"); // first go to processing screen
-
     // stay for 3 seconds, then move to result screen
     setTimeout(() => {
       router.push("/output"); // 👉 change "result" to your actual screen
@@ -73,101 +40,99 @@ export default function Index() {
   };
 
   return (
-    <SafeAreaView className="flex-1 px-3 bg-background">
+    <SafeAreaView className="flex-1 bg-background">
+      {/* Status bar  */}
       <StatusBar barStyle="dark-content" backgroundColor="#FFFEFF" />
+      <View className="flex-1 px-3">
+        {/* App Title */}
+        <View className="items-center mt-2 bg-background">
+          <Text className="text-3xl font-bold text-textDark text-center my-2">
+            BG Remover
+          </Text>
+        </View>
 
-      <View className="items-center mt-2">
-        <Text className="text-3xl font-bold text-textDark text-center my-2">
-          BG Remover
-        </Text>
-      </View>
+        {/* Share and More Apps */}
+        <View className="flex-row justify-center gap-3 px-4 py-4">
+          <Sharebutton />
+          <Morebutton />
+        </View>
 
-      {/* Share and More Apps */}
-      <View className="flex-row justify-center gap-3 px-4 py-4">
-        <TouchableOpacity
-          className="bg-textprimary px-4 py-1 rounded-md flex-row justify-center items-center gap-3"
-          activeOpacity={0.4}
-          onPress={onShare}
+        {/* Upload or Display Image */}
+        <View
+          className="bg-background rounded-lg items-center"
+          style={{
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0,
+            shadowRadius: 0,
+            elevation: 0,
+          }}
         >
-          <Entypo name="share" size={20} color="black" />
-          <Text>Share App</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          activeOpacity={0.4}
-          className="bg-textprimary px-4 py-1 rounded-md flex-row justify-center items-center gap-3"
-        >
-          <MaterialIcons name="window" size={20} color="black" />
-          <Text>More Apps</Text>
-        </TouchableOpacity>
-      </View>
+          {/* If no image selected → show upload icon */}
+          {!selectedImage ? (
+            <View className="w-24 h-24 rounded-full bg-[#EEF1FD] justify-center items-center">
+              <AntDesign name="cloudupload" size={50} color="#5480ED" />
+            </View>
+          ) : (
+            <Image
+              source={{ uri: selectedImage }}
+              className="w-full rounded-lg mb-4"
+              style={{ aspectRatio: 1.5 }} // 1.5 = width:height ratio
+              resizeMode="cover"
+            />
+          )}
 
-      {/* Upload or Display Image */}
-      <View
-        className="bg-background rounded-lg m-3 items-center p-2"
-        style={{
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 0 },
-          shadowOpacity: 0,
-          shadowRadius: 0,
-          elevation: 0,
-        }}
-      >
-        {/* If no image selected → show upload icon */}
-        {!selectedImage ? (
-          <View className="w-24 h-24 rounded-full bg-[#EEF1FD] justify-center items-center">
-            <AntDesign name="cloudupload" size={50} color="#5480ED" />
-          </View>
-        ) : (
-          <Image
-            source={{ uri: selectedImage }}
-            className="w-full rounded-lg mb-4"
-            style={{ aspectRatio: 1.5 }} // 1.5 = width:height ratio
-            resizeMode="cover"
-          />
-        )}
-
-        {/* Show only if no image uploaded */}
-        {!selectedImage && (
-          <>
-            <Text className="font-bold text-2xl my-2">Upload Image</Text>
-            <Text className="text-xl text-textDark mb-4">
-              Choose an image to remove background
-            </Text>
-          </>
-        )}
+          {/* Show only if no image uploaded */}
+          {!selectedImage && (
+            <>
+              <Text className="font-bold text-2xl my-2">Upload Image</Text>
+              <Text className="text-xl text-textDark mb-4">
+                Choose an image to remove background
+              </Text>
+            </>
+          )}
+        </View>
 
         {/* Button changes based on state */}
-        <TouchableOpacity
-          onPress={selectedImage ? removeBackground : pickImage}
-          activeOpacity={0.8}
-          className={`px-4 py-4 rounded-md w-full flex-row gap-4 justify-center items-center ${
-            selectedImage ? "bg-green-600" : "bg-primary"
-          }`}
-        >
-          <FontAwesome6
-            name={selectedImage ? "scissors" : "add"}
-            size={20}
-            color="white"
-          />
-          <Text className="text-white text-xl">
-            {selectedImage ? "Remove Background" : "Upload Image"}
-          </Text>
-        </TouchableOpacity>
-
-        {/* Change Image button (only when image is uploaded) */}
-        {selectedImage && (
-          <TouchableOpacity
-            onPress={pickImage}
+        <View className="w-full space-y-3 gap-3">
+          <CustomButton
+            title={selectedImage ? "Remove Background" : "Upload Image"}
+            onPress={selectedImage ? removeBackground : pickImage}
+            icon={
+              <FontAwesome6
+                name={selectedImage ? "scissors" : "add"}
+                size={20}
+                color="white"
+              />
+            }
+            iconPosition="left"
+            className={`w-full py-4 rounded-md  ${selectedImage ? "bg-green-600" : "bg-primary"}`}
+            textClassName="text-white text-xl"
+            disabled={false}
+            loading={false}
             activeOpacity={0.8}
-            className="bg-gray-400 px-4 py-4 rounded-md w-full flex-row gap-4 justify-center items-center mt-3"
-          >
-            <MaterialIcons name="image" size={20} color="white" />
-            <Text className="text-white text-xl">Change Image</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+          />
 
-      <Text className="text-center mt-5">Powered by AI Background Removal</Text>
+          {/* Change Image button (only when image is uploaded) */}
+          {selectedImage && (
+            <CustomButton
+              title="Change Image"
+              onPress={pickImage}
+              activeOpacity={0.8}
+              className="w-full bg-gray-400 py-4 rounded-md"
+              icon={<MaterialIcons name="image" size={20} color="white" />}
+              iconPosition="left"
+              textClassName="text-white text-xl"
+              disabled={false}
+              loading={false}
+            />
+          )}
+        </View>
+
+        <Text className="text-center mt-5 ">
+          Powered by AI Background Removal
+        </Text>
+      </View>
     </SafeAreaView>
   );
 }
