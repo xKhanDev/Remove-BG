@@ -4,7 +4,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, Image, StatusBar, Text, View } from "react-native";
+import { Alert, Image, ScrollView, StatusBar, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomButton from "../components/Buttons/CustomButton";
 import Morebutton from "../components/Buttons/Morebutton";
@@ -43,7 +43,7 @@ export default function Index() {
     <SafeAreaView className="flex-1 bg-background">
       {/* Status bar  */}
       <StatusBar barStyle="dark-content" backgroundColor="#FFFEFF" />
-      <View className="flex-1 px-3">
+      <ScrollView className="flex-1 px-3">
         {/* App Title */}
         <View className="items-center mt-2 bg-background">
           <Text className="text-3xl font-bold text-textDark text-center my-2">
@@ -128,11 +128,10 @@ export default function Index() {
             />
           )}
         </View>
-
-        <Text className="text-center mt-5 ">
-          Powered by AI Background Removal
-        </Text>
-      </View>
+      </ScrollView>
+      <Text className="text-center mb-5 ">
+        Powered by AI Background Removal
+      </Text>
     </SafeAreaView>
   );
 }

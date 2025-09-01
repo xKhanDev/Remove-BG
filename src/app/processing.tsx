@@ -1,6 +1,6 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
 import React from "react";
-import { StatusBar, Text, View } from "react-native";
+import { ScrollView, StatusBar, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Morebutton from "../components/Buttons/Morebutton";
 import Sharebutton from "../components/Buttons/Sharebutton";
@@ -9,6 +9,8 @@ const processing = () => {
   return (
     <SafeAreaView className="flex-1 px-3 bg-background">
       <StatusBar barStyle="dark-content" backgroundColor="#FFFEFF" />
+
+      <ScrollView className="flex-1 px-3">
 
       <View className="items-center mt-2">
         <Text className="text-3xl font-bold text-textDark text-center my-2">
@@ -46,7 +48,8 @@ const processing = () => {
         {/* Button changes based on state */}
       </View>
 
-      <Text className="text-center mt-5">Powered by AI Background Removal</Text>
+      </ScrollView>
+      <Text className="text-center mb-5">Powered by AI Background Removal</Text>
     </SafeAreaView>
   );
 };

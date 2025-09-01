@@ -1,13 +1,14 @@
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { router } from "expo-router";
 import React from "react";
-import {
-  StatusBar,
-  Text,
-  View
-} from "react-native";
-import BeforeAfterSlider from "react-native-before-after-slider-v2";
+import { Alert, ScrollView, StatusBar, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import CustomButton from "../components/Buttons/CustomButton";
 import Morebutton from "../components/Buttons/Morebutton";
 import Sharebutton from "../components/Buttons/Sharebutton";
+
+import BeforeAfterSlider from "react-native-before-after-slider-v2";
 
 const Output = () => {
   // ✅ Dummy Images from Unsplash (these always work)
@@ -19,35 +20,69 @@ const Output = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 px-3 bg-white">
+    <SafeAreaView className="flex-1 bg-background">
+      {/* Status bar  */}
       <StatusBar barStyle="dark-content" backgroundColor="#FFFEFF" />
+      <ScrollView className="flex-1 px-3">
+        {/* App Title */}
+        <View className="items-center mt-2 bg-background">
+          <Text className="text-3xl font-bold text-textDark text-center my-2">
+            BG Remover
+          </Text>
+        </View>
 
-      <View className="items-center mt-2">
-        <Text className="text-3xl font-bold text-black text-center my-2">
-          BG Remover
-        </Text>
-      </View>
+        {/* Share and More Apps */}
+        <View className="flex-row justify-center gap-3 px-4 py-4">
+          <Sharebutton />
+          <Morebutton />
+        </View>
 
-       {/* Share and More Apps */}
-      <View className="flex-row justify-center gap-3 px-4 py-4">
-       <Sharebutton />
-        <Morebutton />
-      </View>
+        {/* Display Before and After Images */}
+        <View className="flex-1 justify-center w-full mb-3 items-center">
+          <Text className="text-xl font-bold mb-3">Before / After</Text>
+          <View className="w-full h-72 rounded-lg overflow-hidden">
+            <BeforeAfterSlider
+              beforeImage={beforeImage}
+              afterImage={afterImage}
+              width={350}
+              height={300}
+            />
+          </View>
+        </View>
 
-      {/* Before After Slider */}
-      <View className="flex-1 justify-center items-center">
-        <BeforeAfterSlider
-          beforeImage={beforeImage}
-          afterImage={afterImage}
-          width={320}
-          height={400}
-          initialPosition={0.5} // middle
-          dividerWidth={3}
-          dividerColor="#5480ED"
-        />
-      </View>
+        {/* Download and Upload Buttons */}
+        <View className="w-full space-y-3 gap-3">
+          <CustomButton
+            title="Download Image"
+            onPress={() => {
+              Alert.alert("Download button pressed");
+            }}
+            icon={<FontAwesome6 name="download" size={20} color="white" />}
+            iconPosition="left"
+            className="w-full py-4 rounded-md bg-primary"
+            textClassName="text-white text-xl"
+            disabled={false}
+            loading={false}
+            activeOpacity={0.8}
+          />
 
-      <Text className="text-center mt-5">
+          <CustomButton
+            title="Upload New Image"
+            onPress={() => {
+              router.push("/");
+            }}
+            activeOpacity={0.8}
+            className="w-full bg-gray-400 py-4 rounded-md"
+            icon={<MaterialIcons name="add" size={20} color="white" />}
+            iconPosition="left"
+            textClassName="text-white text-xl"
+            disabled={false}
+            loading={false}
+          />
+        </View>
+      </ScrollView>
+
+      <Text className="text-center mb-5">
         Powered by AI Background Removal
       </Text>
     </SafeAreaView>
