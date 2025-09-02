@@ -4,7 +4,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, Image, ScrollView, StatusBar, Text, View } from "react-native";
+import { Alert, Image, ScrollView, StatusBar, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomButton from "../components/Buttons/CustomButton";
 import Morebutton from "../components/Buttons/Morebutton";
@@ -13,31 +13,34 @@ import Sharebutton from "../components/Buttons/Sharebutton";
 export default function Index() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission Denied", "We need access to your gallery.");
-      return;
-    }
+const pickImage = async () => {
+  const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (status !== "granted") {
+    Alert.alert("Permission Denied", "We need access to your gallery.");
+    return;
+  }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: false,
-      quality: 1,
-    });
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: false,
+    quality: 1,
+  });
 
-    if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
-    }
-  };
+  if (!result.canceled) {
+    setSelectedImage(result.assets[0].uri);
+  }
+};
 
-  const removeBackground = () => {
-    router.push("/processing"); // first go to processing screen
-    // stay for 3 seconds, then move to result screen
-    setTimeout(() => {
-      router.push("/output"); // 👉 change "result" to your actual screen
-    }, 3000);
-  };
+const removeBackground = () => {
+  if (!selectedImage) return;
+
+  // ✅ Don’t encode, just pass directly
+  router.push({
+    pathname: "/output",
+    params: { image: selectedImage },
+  });
+};
+
 
   return (
     <SafeAreaView className="flex-1 bg-background">
@@ -58,7 +61,9 @@ export default function Index() {
         </View>
 
         {/* Upload or Display Image */}
-        <View
+        <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={pickImage}
           className="bg-background rounded-lg items-center"
           style={{
             shadowColor: "#000",
@@ -67,6 +72,7 @@ export default function Index() {
             shadowRadius: 0,
             elevation: 0,
           }}
+          
         >
           {/* If no image selected → show upload icon */}
           {!selectedImage ? (
@@ -91,10 +97,10 @@ export default function Index() {
               </Text>
             </>
           )}
-        </View>
+        </TouchableOpacity>
 
         {/* Button changes based on state */}
-        <View className="w-full space-y-3 gap-3">
+        <View className="w-full space-y-3 gap-2">
           <CustomButton
             title={selectedImage ? "Remove Background" : "Upload Image"}
             onPress={selectedImage ? removeBackground : pickImage}

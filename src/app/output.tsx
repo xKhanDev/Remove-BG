@@ -1,27 +1,59 @@
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { router } from "expo-router";
+import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
+import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
-import { Alert, ScrollView, StatusBar, Text, View } from "react-native";
+import { Alert, Image, ScrollView, StatusBar, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomButton from "../components/Buttons/CustomButton";
 import Morebutton from "../components/Buttons/Morebutton";
 import Sharebutton from "../components/Buttons/Sharebutton";
 
-import BeforeAfterSlider from "react-native-before-after-slider-v2";
-
 const Output = () => {
-  // ✅ Dummy Images from Unsplash (these always work)
-  const beforeImage = {
-    uri: "https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d?w=800&h=1000&fit=crop", // with background
-  };
-  const afterImage = {
-    uri: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800&h=1000&fit=crop", // suppose bg removed
-  };
+  const { image } = useLocalSearchParams(); // ✅ get image from params
+  const decodedImage = image ? decodeURIComponent(image as string) : null;
+
+  // const { image } = useLocalSearchParams();
+
+  // ✅ No need to decode, just cast it
+  const imageUri = image as string | undefined;
+
+
+const downloadImage = async () => {
+  try {
+    const { status } = await MediaLibrary.requestPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission required", "Storage permission is needed!");
+      return;
+    }
+
+    if (!image) {
+      Alert.alert("No image", "Please select an image first.");
+      return;
+    }
+
+    // Pick file extension (jpg/png)
+    const fileUri = FileSystem.documentDirectory + "downloadedImage.jpg";
+
+    // ✅ Instead of downloadAsync, copy the local file
+    await FileSystem.copyAsync({
+      from: image, // must be "file://" uri
+      to: fileUri,
+    });
+
+    await MediaLibrary.saveToLibraryAsync(fileUri);
+
+    Alert.alert("✅ Success", "Image saved to gallery!");
+  } catch (error) {
+    console.error(error);
+    Alert.alert("❌ Error", "Download failed!");
+  }
+};
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      {/* Status bar  */}
+      {/* Status bar */}
       <StatusBar barStyle="dark-content" backgroundColor="#FFFEFF" />
       <ScrollView className="flex-1 px-3">
         {/* App Title */}
@@ -37,26 +69,31 @@ const Output = () => {
           <Morebutton />
         </View>
 
-        {/* Display Before and After Images */}
-        <View className="flex-1 justify-center w-full mb-3 items-center">
-          <Text className="text-xl font-bold mb-3">Before / After</Text>
-          <View className="w-full h-72 rounded-lg overflow-hidden">
-            <BeforeAfterSlider
-              beforeImage={beforeImage}
-              afterImage={afterImage}
-              width={350}
-              height={300}
+        {/* Display Selected Image */}
+        {/* Upload or Display Image */}
+        <View
+          className="bg-background rounded-lg items-center flex-1 justify-center w-full "
+          style={{
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0,
+            shadowRadius: 0,
+            elevation: 0,
+          }}
+        >
+            <Image
+              source={{ uri: imageUri }}
+              className="w-full rounded-lg mb-4"
+              style={{ aspectRatio: 1.5 }} // keeps same ratio like before
+              resizeMode="cover"
             />
-          </View>
         </View>
 
         {/* Download and Upload Buttons */}
-        <View className="w-full space-y-3 gap-3">
+        <View className="w-full space-y-3 gap-2">
           <CustomButton
             title="Download Image"
-            onPress={() => {
-              Alert.alert("Download button pressed");
-            }}
+            onPress={downloadImage} // ✅ updated
             icon={<FontAwesome6 name="download" size={20} color="white" />}
             iconPosition="left"
             className="w-full py-4 rounded-md bg-primary"
@@ -82,9 +119,7 @@ const Output = () => {
         </View>
       </ScrollView>
 
-      <Text className="text-center mb-5">
-        Powered by AI Background Removal
-      </Text>
+      <Text className="text-center mb-5">Powered by AI Background Removal</Text>
     </SafeAreaView>
   );
 };
