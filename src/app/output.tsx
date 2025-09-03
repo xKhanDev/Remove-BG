@@ -3,65 +3,84 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import { router, useLocalSearchParams } from "expo-router";
-import React from "react";
-import { Alert, Image, ScrollView, StatusBar, Text, View } from "react-native";
+import React, { useState } from "react";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import BeforeAftericon from "../assets/icons/BeforeAftericon";
 import CustomButton from "../components/Buttons/CustomButton";
 import Morebutton from "../components/Buttons/Morebutton";
 import Sharebutton from "../components/Buttons/Sharebutton";
+import Header from "../components/Header";
 
 const Output = () => {
-  const { image } = useLocalSearchParams(); // ✅ get image from params
-  const decodedImage = image ? decodeURIComponent(image as string) : null;
-
-  // const { image } = useLocalSearchParams();
-
-  // ✅ No need to decode, just cast it
-  const imageUri = image as string | undefined;
-
-
-const downloadImage = async () => {
-  try {
-    const { status } = await MediaLibrary.requestPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission required", "Storage permission is needed!");
-      return;
+  const { image } = useLocalSearchParams();
+  // Dummy + original image state
+  const dummyImage =
+    "https://www.theloverspoint.com/wp-content/uploads/2025/05/attitude-girl-pic.jpg"; // replace with your dummy image
+  let initialUri: string | undefined;
+  if (typeof image === "string") {
+    if (image.startsWith("file://") || image.startsWith("http")) {
+      initialUri = image;
+    } else {
+      initialUri = `file://${image}`;
     }
-
-    if (!image) {
-      Alert.alert("No image", "Please select an image first.");
-      return;
-    }
-
-    // Pick file extension (jpg/png)
-    const fileUri = FileSystem.documentDirectory + "downloadedImage.jpg";
-
-    // ✅ Instead of downloadAsync, copy the local file
-    await FileSystem.copyAsync({
-      from: image, // must be "file://" uri
-      to: fileUri,
-    });
-
-    await MediaLibrary.saveToLibraryAsync(fileUri);
-
-    Alert.alert("✅ Success", "Image saved to gallery!");
-  } catch (error) {
-    console.error(error);
-    Alert.alert("❌ Error", "Download failed!");
   }
-};
+  // ✅ Manage image state
+  const [imageUri, setImageUri] = useState(initialUri);
+  console.log("📷 Image URI:", imageUri); // debug check
+
+  const downloadImage = async () => {
+    try {
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission required", "Storage permission is needed!");
+        return;
+      }
+
+      if (!imageUri) {
+        Alert.alert("No image", "Please select an image first.");
+        return;
+      }
+
+      const folderUri = FileSystem.documentDirectory + "RemoveBG/";
+      const folderInfo = await FileSystem.getInfoAsync(folderUri);
+
+      if (!folderInfo.exists) {
+        await FileSystem.makeDirectoryAsync(folderUri, { intermediates: true });
+      }
+
+      const fileUri = folderUri + `output_${Date.now()}.jpg`;
+
+      await FileSystem.copyAsync({
+        from: imageUri,
+        to: fileUri,
+      });
+
+      await MediaLibrary.saveToLibraryAsync(fileUri);
+
+      Alert.alert(
+        "✅ Success",
+        "Image saved in 'RemoveBG' folder and gallery!"
+      );
+    } catch (error) {
+      console.error("❌ Download error:", error);
+      Alert.alert("❌ Error", "Download failed!");
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      {/* Status bar */}
       <StatusBar barStyle="dark-content" backgroundColor="#FFFEFF" />
       <ScrollView className="flex-1 px-3">
-        {/* App Title */}
-        <View className="items-center mt-2 bg-background">
-          <Text className="text-3xl font-bold text-textDark text-center my-2">
-            BG Remover
-          </Text>
-        </View>
+        <Header />
 
         {/* Share and More Apps */}
         <View className="flex-row justify-center gap-3 px-4 py-4">
@@ -70,30 +89,59 @@ const downloadImage = async () => {
         </View>
 
         {/* Display Selected Image */}
-        {/* Upload or Display Image */}
         <View
-          className="bg-background rounded-lg items-center flex-1 justify-center w-full "
+          className="bg-background rounded-lg items-center"
           style={{
             shadowColor: "#000",
             shadowOffset: { width: 0, height: 0 },
             shadowOpacity: 0,
             shadowRadius: 0,
             elevation: 0,
+            position: "relative",
           }}
         >
+          {/* Custom button in top right */}
+          <View
+            style={{
+              position: "absolute",
+              bottom: 10,
+              right: 5,
+              zIndex: 1,
+            }}
+          >
+            <TouchableOpacity
+              activeOpacity={0.7}
+              className="bg-gray-400 p-2 rounded-full"
+              onLongPress={() => setImageUri(dummyImage)}
+              onPressOut={() => setImageUri(initialUri)}
+              delayLongPress={100}
+            >
+              <BeforeAftericon />
+            </TouchableOpacity>
+          </View>
+
+          {!imageUri ? (
+            <View className="w-full h-48 rounded-lg border-2 border-dashed border-gray-300 justify-center items-center mb-4">
+              <Text className="font-bold text-2xl my-2">No Image</Text>
+              <Text className="text-xl text-textDark mb-4">
+                Please upload an image first
+              </Text>
+            </View>
+          ) : (
             <Image
               source={{ uri: imageUri }}
-              className="w-full rounded-lg mb-4"
-              style={{ aspectRatio: 1.5 }} // keeps same ratio like before
+              className="w-full rounded-lg mb-2"
+              style={{ aspectRatio: 1.5 }}
               resizeMode="cover"
             />
+          )}
         </View>
 
         {/* Download and Upload Buttons */}
-        <View className="w-full space-y-3 gap-2">
+        <View className="w-full gap-2">
           <CustomButton
             title="Download Image"
-            onPress={downloadImage} // ✅ updated
+            onPress={downloadImage}
             icon={<FontAwesome6 name="download" size={20} color="white" />}
             iconPosition="left"
             className="w-full py-4 rounded-md bg-primary"

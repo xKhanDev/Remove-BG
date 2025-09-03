@@ -1,5 +1,11 @@
 import React from "react";
-import { ActivityIndicator, GestureResponderEvent, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  GestureResponderEvent,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 type IconPosition = "left" | "right";
 
@@ -32,17 +38,21 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       activeOpacity={activeOpacity}
       disabled={disabled || loading}
       className={`flex-row items-center justify-center
-        ${(disabled || loading) ? "bg-gray-400" : "bg-blue-500"} ${className}`}
+        ${disabled || loading ? "bg-gray-400" : "bg-blue-500"} ${className}`}
     >
       {loading ? (
         <ActivityIndicator size="small" color="#fff" />
       ) : (
         <View className="flex-row items-center">
-          {icon && iconPosition === "left" && <View className="mr-2">{icon}</View>}
+          {icon && iconPosition === "left" && (
+            <View className="mr-2">{icon}</View>
+          )}
           <Text className={`text-white text-base font-medium ${textClassName}`}>
             {title}
           </Text>
-          {icon && iconPosition === "right" && <View className="ml-2">{icon}</View>}
+          {icon && iconPosition === "right" && (
+            <View className="ml-2">{icon}</View>
+          )}
         </View>
       )}
     </TouchableOpacity>
