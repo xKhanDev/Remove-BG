@@ -26,16 +26,21 @@ const Output = () => {
   const dummyImage =
     "https://www.theloverspoint.com/wp-content/uploads/2025/05/attitude-girl-pic.jpg"; // replace with your dummy image
   let initialUri: string | undefined;
+  
   if (typeof image === "string") {
-    if (image.startsWith("file://") || image.startsWith("http")) {
-      initialUri = image;
+    if (
+      image.startsWith("file://") ||
+      image.startsWith("http") ||
+      image.startsWith("data:image")
+    ) {
+      initialUri = image; // ✅ handles base64 too
     } else {
       initialUri = `file://${image}`;
     }
   }
+
   // ✅ Manage image state
   const [imageUri, setImageUri] = useState(initialUri);
-  console.log("📷 Image URI:", imageUri); // debug check
 
   const downloadImage = async () => {
     try {
@@ -52,24 +57,29 @@ const Output = () => {
 
       const folderUri = FileSystem.documentDirectory + "RemoveBG/";
       const folderInfo = await FileSystem.getInfoAsync(folderUri);
-
       if (!folderInfo.exists) {
         await FileSystem.makeDirectoryAsync(folderUri, { intermediates: true });
       }
 
-      const fileUri = folderUri + `output_${Date.now()}.jpg`;
+      const fileUri = folderUri + `output_${Date.now()}.png`;
 
-      await FileSystem.copyAsync({
-        from: imageUri,
-        to: fileUri,
-      });
+      if (imageUri.startsWith("data:image")) {
+        // Base64 → file
+        const base64Data = imageUri.split(",")[1];
+        await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+      } else {
+        // Normal file path
+        await FileSystem.copyAsync({
+          from: imageUri,
+          to: fileUri,
+        });
+      }
 
       await MediaLibrary.saveToLibraryAsync(fileUri);
 
-      Alert.alert(
-        "✅ Success",
-        "Image saved in 'RemoveBG' folder and gallery!"
-      );
+      Alert.alert("✅ Success", "Image saved in gallery!");
     } catch (error) {
       console.error("❌ Download error:", error);
       Alert.alert("❌ Error", "Download failed!");
@@ -114,7 +124,7 @@ const Output = () => {
               className="bg-gray-400 p-2 rounded-full"
               onLongPress={() => setImageUri(dummyImage)}
               onPressOut={() => setImageUri(initialUri)}
-              delayLongPress={100}
+              delayLongPress={5}
             >
               <BeforeAftericon />
             </TouchableOpacity>
@@ -132,7 +142,7 @@ const Output = () => {
               source={{ uri: imageUri }}
               className="w-full rounded-lg mb-2"
               style={{ aspectRatio: 1.5 }}
-              resizeMode="cover"
+              resizeMode="contain" // 👈 better for base64 images
             />
           )}
         </View>

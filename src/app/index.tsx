@@ -1,6 +1,8 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import axios from "axios";
+import { encode } from "base64-arraybuffer";
 import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
@@ -15,7 +17,6 @@ import Header from "../components/Header";
 export default function Index() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const newPath = FileSystem.documentDirectory + "selectedImage.jpg";
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -45,15 +46,43 @@ export default function Index() {
       setSelectedImage(newPath); // ✅ now always new image shows
     }
   };
+
   const removeBackground = async () => {
     if (!selectedImage) return;
     setLoading(true);
+
+    const formData = new FormData();
+    formData.append("file", {
+      uri: selectedImage,
+      type: "image/jpeg",
+      name: "image.jpg",
+    } as any);
+
     try {
-      // Navigate to output screen with image param
+      const res = await axios.post(
+        "http://192.168.1.20:8080/process/",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          responseType: "arraybuffer", // 👈 receive binary
+        }
+      );
+
+      // Convert binary → base64 using base64-arraybuffer
+      const base64Image = `data:image/png;base64,${encode(res.data)}`;
+
+     setLoading(false);
+
+      // Navigate to output screen with base64 image
       router.push({
         pathname: "/output",
-        params: { image: selectedImage },
+        params: { image: base64Image },
       });
+    } catch (error) {
+      console.error("Error uploading:", error);
+      Alert.alert("Error", "Failed to process image.");
     } finally {
       setLoading(false);
     }
@@ -61,11 +90,11 @@ export default function Index() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      {/* Status bar  */}
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFEFF" />
+      {/* Status bar */}
+      <StatusBar barStyle="dark-content" backgroundColor="#de0adeff" />
       <ScrollView className="flex-1 px-3">
-        {/* App Title */}
         <Header />
+
         {/* Share and More Apps */}
         <View className="flex-row justify-center gap-3 px-4 py-4">
           <Sharebutton />
@@ -83,7 +112,6 @@ export default function Index() {
             elevation: 0,
           }}
         >
-          {/* If no image selected → show upload icon */}
           {!selectedImage ? (
             <View className="w-full h-60 rounded-lg border-2 border-dashed border-gray-300 justify-center items-center mb-4 ">
               <View className="w-24 h-24 rounded-full bg-[#EEF1FD] justify-center items-center">
@@ -98,13 +126,13 @@ export default function Index() {
             <Image
               source={{ uri: selectedImage }}
               className="w-full rounded-lg mb-2"
-              style={{ aspectRatio: 1.5 }} // 1.5 = width:height ratio
+              style={{ aspectRatio: 1.5 }}
               resizeMode="cover"
             />
           )}
         </View>
 
-        {/* Button changes based on state */}
+        {/* Buttons */}
         <View className="w-full space-y-3 gap-2">
           <CustomButton
             title={selectedImage ? "Remove Background" : "Upload Image"}
@@ -117,14 +145,15 @@ export default function Index() {
               />
             }
             iconPosition="left"
-            className={`w-full py-4 rounded-md  ${selectedImage ? "bg-green-600" : "bg-primary"}`}
+            className={`w-full py-4 rounded-md  ${
+              selectedImage ? "bg-green-600" : "bg-primary"
+            }`}
             textClassName="text-white text-xl"
-            disabled={false}
-            loading={false}
+            disabled={loading}
+            loading={loading}
             activeOpacity={0.8}
           />
 
-          {/* Change Image button (only when image is uploaded) */}
           {selectedImage && (
             <CustomButton
               title="Change Image"
