@@ -1,6 +1,7 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import NetInfo from "@react-native-community/netinfo";
 import axios from "axios";
 import { encode } from "base64-arraybuffer";
 import * as FileSystem from "expo-file-system";
@@ -47,59 +48,64 @@ export default function Index() {
     }
   };
 
-  const removeBackground = async () => {
-    if (!selectedImage) return;
-    setLoading(true);
+const removeBackground = async () => {
+  if (!selectedImage) return;
 
-    const formData = new FormData();
-    formData.append("file", {
-      uri: selectedImage,
-      type: "image/jpeg",
-      name: "image.jpg",
-    } as any);
+  // 🔍 Step 1: Check internet connection
+  const state = await NetInfo.fetch();
+  if (!state.isConnected) {
+    Alert.alert("No Internet", "Please connect to the internet first.");
+    return; // ⛔ stop here if no connection
+  }
 
-    try {
-      const res = await axios.post(
-        "http://192.168.1.20:8080/process/",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          responseType: "arraybuffer", // 👈 receive binary
-        }
-      );
+  setLoading(true);
 
-      // Convert binary → base64 using base64-arraybuffer
-      const base64Image = `data:image/png;base64,${encode(res.data)}`;
+  const formData = new FormData();
+  formData.append("file", {
+    uri: selectedImage,
+    type: "image/jpeg",
+    name: "image.jpg",
+  } as any);
 
-     setLoading(false);
+  try {
+    const res = await axios.post(
+      "https://bg-remover-ai.onrender.com/process/",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        responseType: "arraybuffer", // 👈 receive binary
+      }
+    );
 
-      // Navigate to output screen with base64 image
-      router.push({
-        pathname: "/output",
-        params: { image: base64Image },
-      });
-    } catch (error) {
-      console.error("Error uploading:", error);
-      Alert.alert("Error", "Failed to process image.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    // Convert binary → base64
+    const base64Image = `data:image/png;base64,${encode(res.data)}`;
+
+    // ✅ Pass both original & processed image
+    router.push({
+      pathname: "/output",
+      params: { image: base64Image, original: selectedImage },
+    });
+  } catch (error) {
+    console.error("🚨 Upload Failed:", error);
+    Alert.alert(
+      "😢 Oops!",
+      "Looks like our server is taking a little nap. We'll wake it up soon!"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <SafeAreaView className="flex-1 bg-background">
       {/* Status bar */}
-      <StatusBar barStyle="dark-content" backgroundColor="#de0adeff" />
+      <StatusBar barStyle="dark-content" backgroundColor="#FFFEFF" />
       <ScrollView className="flex-1 px-3">
         <Header />
 
-        {/* Share and More Apps */}
-        <View className="flex-row justify-center gap-3 px-4 py-4">
-          <Sharebutton />
-          <Morebutton />
-        </View>
+       
 
         {/* Upload or Display Image */}
         <View
@@ -167,6 +173,11 @@ export default function Index() {
               loading={false}
             />
           )}
+        </View>
+         {/* Share and More Apps */}
+        <View className="flex-row justify-center gap-3 px-4 py-4">
+          <Sharebutton />
+          <Morebutton />
         </View>
       </ScrollView>
       <Text className="text-center mb-5 ">

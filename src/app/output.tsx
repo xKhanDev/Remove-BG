@@ -21,12 +21,9 @@ import Sharebutton from "../components/Buttons/Sharebutton";
 import Header from "../components/Header";
 
 const Output = () => {
-  const { image } = useLocalSearchParams();
-  // Dummy + original image state
-  const dummyImage =
-    "https://www.theloverspoint.com/wp-content/uploads/2025/05/attitude-girl-pic.jpg"; // replace with your dummy image
+  const { image, original } = useLocalSearchParams();
+
   let initialUri: string | undefined;
-  
   if (typeof image === "string") {
     if (
       image.startsWith("file://") ||
@@ -38,7 +35,6 @@ const Output = () => {
       initialUri = `file://${image}`;
     }
   }
-
   // ✅ Manage image state
   const [imageUri, setImageUri] = useState(initialUri);
 
@@ -90,6 +86,7 @@ const Output = () => {
     <SafeAreaView className="flex-1 bg-background">
       <StatusBar barStyle="dark-content" backgroundColor="#FFFEFF" />
       <ScrollView className="flex-1 px-3">
+          {/* this is the App heade */}
         <Header />
 
         {/* Share and More Apps */}
@@ -121,17 +118,21 @@ const Output = () => {
           >
             <TouchableOpacity
               activeOpacity={0.7}
-              className="bg-gray-400 p-2 rounded-full"
-              onLongPress={() => setImageUri(dummyImage)}
-              onPressOut={() => setImageUri(initialUri)}
-              delayLongPress={5}
+              className="bg-gray-400 p-2 rounded-full w-full"
+              onLongPress={() => {
+                if (typeof original === "string") {
+                  setImageUri(original); // show original image
+                }
+              }}
+              onPressOut={() => setImageUri(initialUri)} // switch back to processed
+              delayLongPress={0}
             >
               <BeforeAftericon />
             </TouchableOpacity>
           </View>
 
           {!imageUri ? (
-            <View className="w-full h-48 rounded-lg border-2 border-dashed border-gray-300 justify-center items-center mb-4">
+            <View className="w-full h-60 rounded-lg border-2 border-dashed border-gray-300 justify-center items-center mb-4">
               <Text className="font-bold text-2xl my-2">No Image</Text>
               <Text className="text-xl text-textDark mb-4">
                 Please upload an image first
@@ -142,7 +143,7 @@ const Output = () => {
               source={{ uri: imageUri }}
               className="w-full rounded-lg mb-2"
               style={{ aspectRatio: 1.5 }}
-              resizeMode="contain" // 👈 better for base64 images
+              resizeMode="cover" // 👈 same as previous
             />
           )}
         </View>
@@ -174,6 +175,11 @@ const Output = () => {
             disabled={false}
             loading={false}
           />
+        </View>
+         {/* Share and More Apps */}
+        <View className="flex-row justify-center gap-3 px-4 py-4">
+          <Sharebutton />
+          <Morebutton />
         </View>
       </ScrollView>
 
