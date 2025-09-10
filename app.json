@@ -14,7 +14,8 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#ffffff",
+         "usesCleartextTraffic": true
       },
       "edgeToEdgeEnabled": true,
       "package": "com.aakifkhan.removebg"
