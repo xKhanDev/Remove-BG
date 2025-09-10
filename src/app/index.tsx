@@ -104,9 +104,6 @@ const removeBackground = async () => {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFEFF" />
       <ScrollView className="flex-1 px-3">
         <Header />
-
-       
-
         {/* Upload or Display Image */}
         <View
           className="bg-background rounded-lg items-center"
@@ -179,6 +176,7 @@ const removeBackground = async () => {
           <Sharebutton />
           <Morebutton />
         </View>
+        
       </ScrollView>
       <Text className="text-center mb-5 ">
         Powered by AI Background Removal

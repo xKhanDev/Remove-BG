@@ -87,13 +87,8 @@ const Output = () => {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFEFF" />
       <ScrollView className="flex-1 px-3">
           {/* this is the App heade */}
-        <Header />
-
-        {/* Share and More Apps */}
-        <View className="flex-row justify-center gap-3 px-4 py-4">
-          <Sharebutton />
-          <Morebutton />
-        </View>
+       <Header />
+       
 
         {/* Display Selected Image */}
         <View
