@@ -69,7 +69,7 @@ const removeBackground = async () => {
 
   try {
     const res = await axios.post(
-      "https://bg-remover-ai.onrender.com/process/",
+      "http://192.168.1.28:8080/process/",
       formData,
       {
         headers: {
