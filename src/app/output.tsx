@@ -86,9 +86,8 @@ const Output = () => {
     <SafeAreaView className="flex-1 bg-background">
       <StatusBar barStyle="dark-content" backgroundColor="#FFFEFF" />
       <ScrollView className="flex-1 px-3">
-          {/* this is the App heade */}
-       <Header />
-       
+        {/* this is the App heade */}
+        <Header />
 
         {/* Display Selected Image */}
         <View
@@ -136,7 +135,7 @@ const Output = () => {
           ) : (
             <Image
               source={{ uri: imageUri }}
-              className="w-full rounded-lg mb-2"
+              className="w-full rounded-lg mb-2 border border-black/10"
               style={{ aspectRatio: 1.5 }}
               resizeMode="cover" // 👈 same as previous
             />
@@ -171,7 +170,7 @@ const Output = () => {
             loading={false}
           />
         </View>
-         {/* Share and More Apps */}
+        {/* Share and More Apps */}
         <View className="flex-row justify-center gap-3 px-4 py-4">
           <Sharebutton />
           <Morebutton />
