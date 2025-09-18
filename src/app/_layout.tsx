@@ -3,7 +3,7 @@ import "../../global.css";
 
 export default function RootLayout() {
   return (
-    <Stack>
+    <Stack screenOptions={{ animation: "slide_from_right" }}>
       <Stack.Screen
         name="index"
         options={{

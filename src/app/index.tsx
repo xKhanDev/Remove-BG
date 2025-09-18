@@ -7,7 +7,7 @@ import { encode } from "base64-arraybuffer";
 import * as FileSystem from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Alert, Image, ScrollView, StatusBar, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import CustomButton from "../components/Buttons/CustomButton";
@@ -18,6 +18,16 @@ import Header from "../components/Header";
 export default function Index() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  /** Save base64 string to a file and return its file:// URI */
+  const saveBase64ToFile = async (base64: string) => {
+    const filename =
+      FileSystem.documentDirectory + `processed_${Date.now()}.png`;
+    await FileSystem.writeAsStringAsync(filename, base64, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+    return filename; // -> file:///... URI
+  };
 
   const pickImage = async () => {
     setSelectedImage(null);
@@ -36,32 +46,24 @@ export default function Index() {
 
     if (!result.canceled) {
       const pickedUri = result.assets[0].uri;
-
-      // 👇 create a unique name for each upload
+      // create a unique name
       const uniqueName = `selectedImage_${Date.now()}.jpg`;
       const newPath = FileSystem.documentDirectory + uniqueName;
-
-      await FileSystem.copyAsync({
-        from: pickedUri,
-        to: newPath,
-      });
-
-      setSelectedImage(newPath); // ✅ now always new image shows
+      await FileSystem.copyAsync({ from: pickedUri, to: newPath });
+      setSelectedImage(newPath);
     }
   };
 
   const removeBackground = async () => {
     if (!selectedImage) return;
 
-    // 🔍 Step 1: Check internet connection
     const state = await NetInfo.fetch();
     if (!state.isConnected) {
       Alert.alert("No Internet", "Please connect to the internet first.");
-      return; // ⛔ stop here if no connection
+      return;
     }
 
     setLoading(true);
-
     const formData = new FormData();
     formData.append("file", {
       uri: selectedImage,
@@ -74,20 +76,18 @@ export default function Index() {
         "https://ihtesham0345-remove-bg-in-huggingface.hf.space/process/",
         formData,
         {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-          responseType: "arraybuffer", // 👈 receive binary
+          headers: { "Content-Type": "multipart/form-data" },
+          responseType: "arraybuffer",
         }
       );
 
-      // Convert binary → base64
-      const base64Image = `data:image/png;base64,${encode(res.data)}`;
-
-      // ✅ Pass both original & processed image
+      // binary -> base64 (no data: prefix)
+      const base64Raw = encode(res.data);
+      // Save to file and get local URI
+      const processedUri = await saveBase64ToFile(base64Raw);
       router.push({
         pathname: "/output",
-        params: { image: base64Image, original: selectedImage },
+        params: { image: processedUri, original: selectedImage },
       });
     } catch (error) {
       console.error("🚨 Upload Failed:", error);
@@ -102,10 +102,10 @@ export default function Index() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      {/* Status bar */}
       <StatusBar barStyle="dark-content" backgroundColor="#FFFEFF" />
       <ScrollView className="flex-1 px-3">
         <Header />
+
         {/* Upload or Display Image */}
         <View
           className="bg-background rounded-lg items-center"
@@ -150,7 +150,7 @@ export default function Index() {
               />
             }
             iconPosition="left"
-            className={`w-full py-4 rounded-md  ${
+            className={`w-full py-4 rounded-md ${
               selectedImage ? "bg-green-600" : "bg-primary"
             }`}
             textClassName="text-white text-xl"
@@ -173,6 +173,7 @@ export default function Index() {
             />
           )}
         </View>
+
         {/* Share and More Apps */}
         <View className="flex-row justify-center gap-3 px-4 py-4">
           <Sharebutton />
